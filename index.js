@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const port = 3000; // 服务端口
+const port = 3010; // 服务端口
 
 const jwt = require("jsonwebtoken");
 const JWT_SECRET_KEY = "JWT_SECRET_KEY";

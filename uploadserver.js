@@ -2,6 +2,8 @@ const express = require('express')
 const app = express()
 const port = 9000
 const Response = require('./utils/Response.js')
+// const BASE  = "http://localhost:9000/"
+const BASE  = "http://localhost:9000/"
 
 // 配置跨域
 const cors = require('cors')
@@ -34,7 +36,7 @@ app.use(express.static('static'))
 
 app.post('/upload', uploadTools.single('file'),  (req, resp)=>{
     // multer中间件将会把文件信息存入：req.files
-    let url = "http://localhost:9000/" + req.file.filename
+    let url = BASE + req.file.filename
     console.log(req.file)
     resp.send(Response.ok(url))
 })

@@ -79,26 +79,36 @@ router.post("/movie-actor/add", (req, resp) => {
  *   {code:200, msg:'ok', data:[{演员Obj},{演员Obj},{演员Obj}]}
  */
 router.post("/movie-actors/name", (req, resp) => {
-  let { name } = req.body;
-  //TODO 服务端表单验证  如果验证通过那么继续后续业务  如果验证不通过，则直接返回参数异常
-  let schema = Joi.object({
-    name: Joi.string().required(), // 必填
-  });
-  let { error, value } = schema.validate(req.body);
-  if (error) {
-    resp.send(Response.error(400, error));
-    return; // 结束
+  let { name, size} = req.body;
+  size = Number(size);
+console.log(name, typeof size)
+//TODO 服务端表单验证  如果验证通过那么继续后续业务  如果验证不通过，则直接返回参数异常
+let schema = Joi.object({
+  name: Joi.string().required(),
+  size: Joi.number().required()// 必填
+
+});
+let { error, value } = schema.validate(req.body);
+console.log(name, typeof size)
+if (error) {
+
+  console.log(error)
+  resp.send(Response.error(400, error));
+  return; // 结束
+}
+// 执行模糊查询
+let sql = "select * from movie_actor where actor_name like ? limit ?";
+console.log(size, name)
+pool.query(sql, [`%${name}%`, size], (err, result) => {
+
+  if (err) {
+    resp.send(Response.error(500, error));
+    throw err;
   }
-  // 执行模糊查询
-  let sql = "select * from movie_actor where actor_name like ?";
-  pool.query(sql, [`%${name}%`], (err, result) => {
-    if (err) {
-      resp.send(Response.error(500, error));
-      throw err;
-    }
-    // 将结果封装，返回给客户端
-    resp.send(Response.ok(result));
-  });
+  // 将结果封装，返回给客户端
+
+  resp.send(Response.ok(result));
+});
 });
 
 /**

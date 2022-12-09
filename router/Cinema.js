@@ -92,6 +92,50 @@ router.get('/cinemas', (req, resp)=>{
 })
 
 /**
+ * 通过日期与电影ID查询有该电影排期的电影院列表
+ * 
+ */
+router.get('/cinemas/date', (req, resp)=>{
+  let {showingon_date, movie_id} = req.query
+  // 表单验证
+  let schema = Joi.object({
+    showingon_date: Joi.string().required(),
+    movie_id: Joi.string().required()
+  });
+  let { error, value } = schema.validate(req.query);
+  if (error) {
+    resp.send(Response.error(400, error));
+    return; // 结束
+  }
+
+  // 执行查询
+  let sql = `SELECT
+    mc.id id,
+    mc.cinema_name cinema_name,
+    mc.address address,
+    mc.province province,
+    mc.city city,
+    mc.district district,
+    mc.longitude longitude,
+    mc.latitude latitude,
+    mc.tags tags
+  FROM
+    movie_cinema mc join showingon_plan sp on mc.id=sp.cinema_id
+  WHERE
+    sp.movie_id=? and sp.showingon_date=? and status=1
+  GROUP BY
+    mc.id`
+
+  pool.query(sql, [movie_id, showingon_date], (error, result)=>{
+    if(error){
+      resp.send(Response.error(500, error))
+      throw error;
+    }
+    resp.send(Response.ok(result))
+  })
+})
+
+/**
  * 查询所有电影院的标签
  * @param:
  *   无
